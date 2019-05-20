@@ -13,7 +13,7 @@ parameters:
 steps:
   - run:
       name: Verify existence of $CIRCLE_COMPARE_URL
-      command: if [ -z ${NOW_TOKEN+x} ]; then exit 0; fi
+      command: if [ -z ${CIRCLE_COMPARE_URL+x} ]; then exit 0; fi
       # NOTE: there are outstanding issues with the URL being blank, circa Q1 2019
       # Further reading and resources: https://github.com/iynere/compare-url
   - run:
