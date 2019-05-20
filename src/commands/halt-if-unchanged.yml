@@ -1,0 +1,28 @@
+orbs:
+  compare-url: iynere/compare-url@0.4.10
+
+description: >
+  Halts redundant CI runs if watched directories are unchanged
+
+parameters:
+  watch:
+    description: "Directories to watch for changes, separated by spaces"
+    type: string
+    default: ""
+
+# We use CIRCLE_COMPARE_URL to halt redundant jobs
+# Saving you time, and in turn TONS in runtime costs
+# To make this happen, we need this orb to construct the URL
+# (there are outstanding issues with the URL being blank, circa Q1 2019)
+# https://github.com/iynere/compare-url
+steps:
+  - compare-url/reconstruct
+  - run:
+      # https://github.com/iynere/compare-url#command-example
+      name: "runtime-optimizer: Halt if watch files unchanged"
+      command: |
+        # Load the compare URL, since this is a fresh shell
+        CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+        # Run the check-changes script
+        cd ~/repo
+        sh .circleci/check-changes.sh "${CIRCLE_COMPARE_URL}" ".circleci << parameters.watch >>" || circleci step halt

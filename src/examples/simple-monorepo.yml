@@ -1,0 +1,42 @@
+description: >
+  Execute some action only for modified files from this commit.
+  In this scenario, a monorepo containing "/client" and "/server"
+  recently had changes to the client, but not the server
+  Using runtime-optimizer/halt-if-unchanged, only client-side
+  jobs should run. Server tests
+  https://discuss.circleci.com/t/does-circleci-2-0-work-with-monorepos
+
+usage:
+  version: 2.1
+
+  orbs:
+    runtime-optimizer: rckeller/runtime-optimizer@0.1
+
+  workflows:
+    version: 2
+    publish-orbs:
+      jobs:
+        - test-client
+        - test-server
+
+  jobs:
+    test-client:
+      docker:
+        - image: circleci/circleci-cli
+      steps:
+        - checkout
+        - runtime-optimizer/halt-if-unchanged
+          - watch: "client" # CHANGED
+        - run:
+          name: Your client-side tests here
+          command: exit 0 # In this example, should be reached
+    test-server:
+      docker:
+        - image: circleci/circleci-cli
+      steps:
+        - checkout
+        - runtime-optimizer/halt-if-unchanged
+          - watch: "server" # UNCHANGED
+        - run:
+          name: Your server-side tests here
+          command: exit 1 # In this example, should NOT be reachable
