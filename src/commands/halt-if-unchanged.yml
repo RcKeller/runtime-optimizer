@@ -279,7 +279,7 @@ steps:
         last=$(last_run_commit $compare_range)
         watch_files=$("<<parameters.watch>>")
 
-        echo "Comparing changes for range ${last} to ${first} from URL ${1}:"
+        echo "Comparing changes for range ${last} to ${first}"
 
         output=$(git diff $last^ $first -- $watch_files 2>&1)
 
