@@ -2,11 +2,7 @@ description: >
   Halts redundant CI runs if watched directories are unchanged
 
 parameters:
-  watch:
-    description: >
-      Directories to watch for changes, separated by spaces
-    type: string
-    default: ".circleci"
+  # === FROM iynere/compare-url ===
   circle-token:
     description: >
       Your CircleCI API token, defaults to $CIRCLE_TOKEN
@@ -26,12 +22,19 @@ parameters:
     type: boolean
     default: false
 
+  # Original
+  watch:
+    description: >
+      Directories to watch for changes, separated by spaces
+    type: string
+    default: ".circleci"
+
 # We use CIRCLE_COMPARE_URL to halt redundant jobs
 # Saving you time, and in turn TONS in runtime costs
 steps:
   # === From iynere/compare-url ===
   - run:
-      name: Check if CircleCI API token is set
+      name: "[iynere/compare-url] - Check if CircleCI API token is set"
       command: |
         if [[ -z "$<<parameters.circle-token>>" ]]; then
           echo "WARNING: you have not stored a CircleCI API token"
@@ -39,18 +42,10 @@ steps:
         else
           echo "You have stored a CircleCI API token"
         fi
-  # - run:
-  #     name: Verify existence of $CIRCLE_COMPARE_URL
-  #     command: if [ -z ${CIRCLE_COMPARE_URL+x} ]; then exit 1; fi
-      # NOTE: there are outstanding issues with the URL being blank, circa Q1 2019
-      # Further reading and resources: https://github.com/iynere/compare-url
   - run:
-      # https://github.com/iynere/compare-url#command-example
-      name: "runtime-optimizer: Halt if watch files unchanged"
+      name: "[iynere/compare-url] - Reconstruct CIRCLE_COMPARE_URL"
       when: always
       command: |
-        echo "Recreating CIRCLE_COMPARE_URL using iynere/compare-url's internals"
-        echo "(we do this because orbs can't depend upon each other)"
         ## VARS
 
         # this starts as false, set to true to exit `until` loop
@@ -244,19 +239,29 @@ steps:
         echo "recreated CIRCLE_COMPARE_URL:"
         echo $CIRCLE_COMPARE_URL
         echo "----------------------------------------------------------------------------------------------------"
-        echo ""
-        echo "runtime-optimizer/halt-if-unchanged: using CIRCLE_COMPARE_URL to check for changes
+        echo "outputting CIRCLE_COMPARE_URL to a file in your working directory, called CIRCLE_COMPARE_URL.txt"
+        echo "(BASE_COMPARE_COMMIT has also been stored in your working directory as BASE_COMPARE_COMMIT.txt)"
+        echo $CIRCLE_COMPARE_URL > CIRCLE_COMPARE_URL.txt
         echo "----------------------------------------------------------------------------------------------------"
-        # === NEW SCRIPT ===
-        cd -
+        echo "next: both CIRCLE_COMPARE_URL.txt and BASE_COMPARE_COMMIT.txt will be persisted to a workspace, in case they are needed in later jobs"
+  - persist_to_workspace:
+      root: .
+      paths:
+        - CIRCLE_COMPARE_URL.txt
+        - BASE_COMPARE_COMMIT.txt
+  # Original
+  - run:
+      name:
+      command: |
+        # Load the compare URL, since this is a fresh shell
+        CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+
         range() {
             echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev
         }
-
         last_run_commit() {
             echo "$CIRCLE_COMPARE_URL" | cut -d. -f 1 | cut -d^ -f 1
         }
-
         current_commit() {
             echo "$CIRCLE_COMPARE_URL" | cut -d. -f 4
         }
