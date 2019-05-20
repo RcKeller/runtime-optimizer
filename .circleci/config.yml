@@ -7,23 +7,48 @@ orbs:
   # publish manually once before this worklow can succeed)
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
 
+# === INTEGRATION TESTS (for this orb) ===
+jobs:
+  integration-tests:
+    # executor: ci-base
+    docker:
+      - image: cibuilds/base
+    # In the future, set circle git commit range manually?
+    # parameters
+    steps:
+      - checkout
+      - runtime-optimizer/halt-if-unchanged:
+          watch: "LICENSE" # should never change
+      # The run should halt now - which is a success
+      # If it doesn't, fail integration
+      - run:
+          name: "runtime-optimizer/halt-if-unchanged - failed to halt"
+          command: echo "FAILURE - should've exited" && exit 1
+
+  # integration-tests-master:
+  #   executor: ci-base
+  #   # In the future, set circle git commit range manually?
+  #   # parameters
+  #   steps:
+  #     - checkout
+  #     - runtime-optimizer/halt-if-unchanged:
+  #         watch: "LICENSE" # should never change
+  #     # The run should halt now - which is a success
+  #     # If it doesn't, fail integration
+  #     - run:
+  #         name: "runtime-optimizer/halt-if-unchanged - failed to halt"
+  #         command: echo "FAILURE - should've exited" && exit 1
+
 workflows:
   lint_pack-validate_publish-dev:
     jobs:
-      # this `lint-pack_validate_publish-dev` workflow will run on any commit
+      # Linter
       - orb-tools/lint
-
-      # pack your orb YAML files to a single orb.yml
-      # validate the orb.yml file to ensure it is well-formed
+      # Pack all YAML files as a single file - orb.yml + validate
       - orb-tools/pack:
           requires:
             - orb-tools/lint
-
       # release dev version of orb, for testing & possible publishing
-      # requires a CircleCI API token to be stored as CIRCLE_TOKEN (default)
-      # https://circleci.com/docs/2.0/managing-api-tokens
-      # store CIRCLE_TOKEN as a project env var or Contexts resource
-      # if using Contexts, add your context below
       - orb-tools/publish-dev:
           orb-name: rckeller/runtime-optimizer
           requires:
@@ -33,88 +58,88 @@ workflows:
       # # an SSH key must be stored in your orb's repository and in CircleCI
       # # (add the public key as a read/write key on GitHub; add the private
       # # key in CircleCI via SSH Permissions, with github.com as Hostname)
-      # - orb-tools/trigger-integration-workflow:
-      #     name: trigger-integration-dev
-      #     ssh-fingerprints: your-SSH-fingerprints
-      #     requires:
-      #       - orb-tools/publish-dev
-      #     filters:
-      #       branches:
-      #         ignore: master
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-dev
+          ssh-fingerprints: a9:88:12:91:d0:a9:2f:e2:96:91:b1:1d:e7:3c:4c:eb
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              ignore: master
 
       # # by default, the 1st job (above) will trigger only integration tests;
       # # the 2nd job (below) may also publish a production orb version
-      # - orb-tools/trigger-integration-workflow:
-      #     name: trigger-integration-master
-      #     ssh-fingerprints: your-SSH-fingerprints
-      #     tag: master
-      #     requires:
-      #       - orb-tools/publish-dev
-      #     filters:
-      #       branches:
-      #         only: master
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-master
+          ssh-fingerprints: a9:88:12:91:d0:a9:2f:e2:96:91:b1:1d:e7:3c:4c:eb
+          tag: master
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              only: master
 
   # # this `integration-tests_prod-release` workflow will ignore commits
   # # it is only triggered by git tags, which are created in the job above
-  # integration-tests_prod-release:
-  #   jobs:
-  #     # your integration test jobs go here: essentially, run all your orb's
-  #     # jobs and commands to ensure they behave as expected. or, run other
-  #     # integration tests of your choosing
+  integration-tests_prod-release:
+    jobs:
+      # your integration test jobs go here: essentially, run all your orb's
+      # jobs and commands to ensure they behave as expected. or, run other
+      # integration tests of your choosing
 
-  #     # this would need to be defined in a `jobs` section (not shown here)
-  #     - integration-tests:
-  #         name: integration-tests-dev
-  #         filters:
-  #           branches:
-  #             ignore: /.*/
-  #           tags:
-  #             only: /integration-.*/
+      # this would need to be defined in a `jobs` section (not shown here)
+      - integration-tests:
+          name: integration-tests-dev
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /integration-.*/
 
-  #     # call jobs twice, once for workflows resulting from non-master-branch
-  #     # commits (above); once for commits to master (below)
-  #     - integration-tests:
-  #         name: integration-tests-master
-  #         filters:
-  #           branches:
-  #             ignore: /.*/
-  #           tags:
-  #             only: /master-.*/
+      # call jobs twice, once for workflows resulting from non-master-branch
+      # commits (above); once for commits to master (below)
+      - integration-tests:
+          name: integration-tests-master
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-.*/
 
-  #     # patch, minor, or major publishing, depending on which orb source
-  #     # files have been modified (that logic lives in the
-  #     # trigger-integration-workflow job's source)
-  #     - orb-tools/dev-promote-prod:
-  #         name: dev-promote-patch
-  #         orb-name: rckeller/runtime-optimizer
-  #         requires:
-  #           - integration-tests-master
-  #         filters:
-  #           branches:
-  #             ignore: /.*/
-  #           tags:
-  #             only: /master-patch.*/
+      # patch, minor, or major publishing, depending on which orb source
+      # files have been modified (that logic lives in the
+      # trigger-integration-workflow job's source)
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-patch
+          orb-name: rckeller/runtime-optimizer
+          requires:
+            - integration-tests-master
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-patch.*/
 
-  #     - orb-tools/dev-promote-prod:
-  #         name: dev-promote-minor
-  #         release: minor
-  #         orb-name: rckeller/runtime-optimizer
-  #         requires:
-  #           - integration-tests-master
-  #         filters:
-  #           branches:
-  #             ignore: /.*/
-  #           tags:
-  #             only: /master-minor.*/
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-minor
+          release: minor
+          orb-name: rckeller/runtime-optimizer
+          requires:
+            - integration-tests-master
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-minor.*/
 
-  #     - orb-tools/dev-promote-prod:
-  #         name: dev-promote-major
-  #         release: major
-  #         orb-name: rckeller/runtime-optimizer
-  #         requires:
-  #           - integration-tests-master
-  #         filters:
-  #           branches:
-  #             ignore: /.*/
-  #           tags:
-  #             only: /master-major.*/
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-major
+          release: major
+          orb-name: rckeller/runtime-optimizer
+          requires:
+            - integration-tests-master
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-major.*/

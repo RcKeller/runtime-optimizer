@@ -6,7 +6,7 @@ parameters:
     description: >
       Directories to watch for changes, separated by spaces
     type: string
-    default: "."
+    default: ".circleci"
 
 # We use CIRCLE_COMPARE_URL to halt redundant jobs
 # Saving you time, and in turn TONS in runtime costs
@@ -23,4 +23,4 @@ steps:
         # Load the compare URL, since this is a fresh shell
         CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
         # Run the check-changes script
-        sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" ".circleci << parameters.watch >>" || circleci step halt
+        sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" "<< parameters.watch >>" || circleci step halt
