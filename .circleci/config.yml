@@ -6,6 +6,8 @@ orbs:
   # @dev:alpha release must exist; if none exists, you'll need to
   # publish manually once before this worklow can succeed)
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
+  # DEPENDENCIES
+  compare-url: iynere/compare-url@0.4.10
 
 workflows:
   lint_pack-validate_publish-dev:
