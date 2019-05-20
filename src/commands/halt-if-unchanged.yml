@@ -255,7 +255,6 @@ steps:
       command: |
         # Load the compare URL, since this is a fresh shell
         CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
-        cd "<<parameters.project-path>>"
         echo "----------------------------------------------------------------------------------------------------"
         echo "Checking for changes:"
         echo $CIRCLE_COMPARE_URL
