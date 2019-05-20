@@ -265,13 +265,13 @@ steps:
         echo "----------------------------------------------------------------------------------------------------"
 
         range() {
-            echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev
+            echo $CIRCLE_COMPARE_URL | rev | cut -d/ -f1 | rev
         }
         last_run_commit() {
-            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 1 | cut -d^ -f 1
+            echo $CIRCLE_COMPARE_URL | cut -d. -f 1 | cut -d^ -f 1
         }
         current_commit() {
-            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 4
+            echo $CIRCLE_COMPARE_URL | cut -d. -f 4
         }
 
         compare_range=$(range $CIRCLE_COMPARE_URL)
