@@ -18,7 +18,7 @@ jobs:
     steps:
       - checkout
       - runtime-optimizer/halt-if-unchanged:
-          watch: "LICENSE" # should never change
+          watch: "src/examples src/scripts" # should never change
       # The run should halt now - which is a success
       # If it doesn't, fail integration
       - run:

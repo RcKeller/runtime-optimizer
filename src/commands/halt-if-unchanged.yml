@@ -255,7 +255,12 @@ steps:
       command: |
         # Load the compare URL, since this is a fresh shell
         CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
-
+        echo "----------------------------------------------------------------------------------------------------"
+        echo "Checking for changes"
+        echo $CIRCLE_COMPARE_URL
+        echo "<<parameters.watch>>"
+        echo "----------------------------------------------------------------------------------------------------"
+        
         range() {
             echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev
         }
@@ -272,7 +277,7 @@ steps:
 
         echo "Comparing changes for range ${last} to ${first} from URL ${1}:"
 
-        output=$(git diff $last^ $first -- << parameters.watch >> 2>&1)
+        output=$(git diff $last^ $first -- "<<parameters.watch>>" 2>&1)
 
         if [ $? -gt 0 ]; then
           echo "Error looking for changes!"
