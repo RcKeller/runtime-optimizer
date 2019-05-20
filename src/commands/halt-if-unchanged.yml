@@ -248,4 +248,5 @@ steps:
         echo "runtime-optimizer/halt-if-unchanged: using CIRCLE_COMPARE_URL to check for changes
         echo "----------------------------------------------------------------------------------------------------"
         # === NEW SCRIPT ===
+        cd -
         sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" "<<parameters.watch>>" || circleci step halt
