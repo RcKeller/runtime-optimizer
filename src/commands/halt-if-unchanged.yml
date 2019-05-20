@@ -19,8 +19,4 @@ steps:
   - run:
       # https://github.com/iynere/compare-url#command-example
       name: "runtime-optimizer: Halt if watch files unchanged"
-      command: |
-        # Load the compare URL, since this is a fresh shell
-        CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
-        # Run the check-changes script
-        sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" "<< parameters.watch >>" || circleci step halt
+      command: sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" "<< parameters.watch >>" || circleci step halt
