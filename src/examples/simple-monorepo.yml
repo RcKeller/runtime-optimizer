@@ -25,18 +25,18 @@ usage:
         - image: circleci/circleci-cli
       steps:
         - checkout
-        - runtime-optimizer/halt-if-unchanged
-          - watch: "client" # CHANGED
+        - runtime-optimizer/halt-if-unchanged:
+            watch: "client" # CHANGED
         - run:
-          name: Your client-side tests here
-          command: exit 0 # In this example, should be reached
+            name: Your client-side tests here
+            command: exit 0 # In this example, should be reached
     test-server:
       docker:
         - image: circleci/circleci-cli
       steps:
         - checkout
-        - runtime-optimizer/halt-if-unchanged
-          - watch: "server" # UNCHANGED
+        - runtime-optimizer/halt-if-unchanged:
+            watch: "server" # UNCHANGED
         - run:
-          name: Your server-side tests here
-          command: exit 1 # In this example, should NOT be reachable
+            name: Your server-side tests here
+            command: exit 1 # In this example, should NOT be reachable
