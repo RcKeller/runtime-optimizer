@@ -10,3 +10,4 @@
 circleci config validate
 yamllint -d .yamllint .
 ```
+<!-- circleci orb publish src/@orb.yml rckeller/runtime-optimizer@dev:alpha -->
