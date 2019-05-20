@@ -25,4 +25,4 @@ steps:
         CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
         # Run the check-changes script
         cd ~/repo
-        sh .circleci/check-changes.sh "${CIRCLE_COMPARE_URL}" ".circleci << parameters.watch >>" || circleci step halt
+        sh ../check-changes.sh "${CIRCLE_COMPARE_URL}" ".circleci << parameters.watch >>" || circleci step halt
