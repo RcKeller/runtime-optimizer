@@ -3,8 +3,3 @@ version: 2.1
 description: >
   Various commands and jobs for optimizing CircleCI runtime
   https://github.com/rckeller/circleci-runtime-optimizer
-
-# executors:
-#   ci-base:
-#     docker:
-#       - image: cibuilds/base

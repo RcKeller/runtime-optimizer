@@ -2,33 +2,30 @@ version: 2.1
 
 orbs:
   orb-tools: circleci/orb-tools@6.0.0
-  # add your orb below, to be used in integration tests (note: a
-  # @dev:alpha release must exist; if none exists, you'll need to
-  # publish manually once before this worklow can succeed)
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
+  # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
   compare-url: iynere/compare-url@1.0.0
 
 # === INTEGRATION TESTS (for this orb) ===
 jobs:
   integration-tests:
-    # executor: ci-base
     docker:
       - image: cibuilds/base
-    # In the future, set circle git commit range manually?
-    # parameters
     steps:
       - checkout
-      - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
-      # CASE: Something has changed - continue running
+      - compare-url/reconstruct:
+          debug: true
+      # CASE: Something has changed - continue running job
       - runtime-optimizer/halt-if-unchanged:
           watch: "." # everything
-      # CASE: No changes to watched files, so halt
+      # CASE: No changes to watched files, so halt job
       - runtime-optimizer/halt-if-unchanged:
           watch: "LICENSE" # should never change
       - run:
-          name: "runtime-optimizer/halt-if-unchanged - failed to halt"
+          name: "[runtime-optimizer/halt-if-unchanged] - failed to halt"
           command: echo "FAILURE - should've exited" && exit 1
 
+# === WORKFLOWS (for publishing this orb) ===
 workflows:
   lint_pack-validate_publish-dev:
     jobs:
@@ -73,11 +70,7 @@ workflows:
   # # it is only triggered by git tags, which are created in the job above
   integration-tests_prod-release:
     jobs:
-      # your integration test jobs go here: essentially, run all your orb's
-      # jobs and commands to ensure they behave as expected. or, run other
-      # integration tests of your choosing
-
-      # this would need to be defined in a `jobs` section (not shown here)
+      # Integration tests are renamed based on branch filters
       - integration-tests:
           name: integration-tests-dev
           filters:
@@ -85,9 +78,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /integration-.*/
-
-      # call jobs twice, once for workflows resulting from non-master-branch
-      # commits (above); once for commits to master (below)
       - integration-tests:
           name: integration-tests-master
           filters:
@@ -109,7 +99,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /master-patch.*/
-
       - orb-tools/dev-promote-prod:
           name: dev-promote-minor
           release: minor
@@ -121,7 +110,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /master-minor.*/
-
       - orb-tools/dev-promote-prod:
           name: dev-promote-major
           release: major

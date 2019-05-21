@@ -11,6 +11,8 @@ usage:
 
   orbs:
     runtime-optimizer: rckeller/runtime-optimizer@0.1
+    # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
+    compare-url: iynere/compare-url@1.0.0
 
   workflows:
     version: 2

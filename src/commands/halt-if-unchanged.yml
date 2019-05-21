@@ -8,8 +8,6 @@ parameters:
     type: string
     default: ".circleci"
 
-# We use CIRCLE_COMPARE_URL to halt redundant jobs
-# Saving you time, and in turn TONS in runtime costs
 steps:
   - run:
       name: "[runtime-optimizer/halt-if-unchanged] - Halting if watch files are unchanged"
