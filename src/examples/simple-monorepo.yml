@@ -25,6 +25,7 @@ usage:
         - image: circleci/circleci-cli
       steps:
         - checkout
+        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "client" # CHANGED
         - run:
@@ -35,6 +36,7 @@ usage:
         - image: circleci/circleci-cli
       steps:
         - checkout
+        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "server" # UNCHANGED
         - run:

@@ -6,6 +6,7 @@ orbs:
   # @dev:alpha release must exist; if none exists, you'll need to
   # publish manually once before this worklow can succeed)
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
+  compare-url: iynere/compare-url@1.0.0
 
 # === INTEGRATION TESTS (for this orb) ===
 jobs:
@@ -17,27 +18,16 @@ jobs:
     # parameters
     steps:
       - checkout
+      - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
+      # CASE: Something has changed - continue running
+      - runtime-optimizer/halt-if-unchanged:
+          watch: "." # everything
+      # CASE: No changes to watched files, so halt
       - runtime-optimizer/halt-if-unchanged:
           watch: "LICENSE" # should never change
-      # The run should halt now - which is a success
-      # If it doesn't, fail integration
       - run:
           name: "runtime-optimizer/halt-if-unchanged - failed to halt"
           command: echo "FAILURE - should've exited" && exit 1
-
-  # integration-tests-master:
-  #   executor: ci-base
-  #   # In the future, set circle git commit range manually?
-  #   # parameters
-  #   steps:
-  #     - checkout
-  #     - runtime-optimizer/halt-if-unchanged:
-  #         watch: "LICENSE" # should never change
-  #     # The run should halt now - which is a success
-  #     # If it doesn't, fail integration
-  #     - run:
-  #         name: "runtime-optimizer/halt-if-unchanged - failed to halt"
-  #         command: echo "FAILURE - should've exited" && exit 1
 
 workflows:
   lint_pack-validate_publish-dev:
