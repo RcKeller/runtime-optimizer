@@ -22,4 +22,6 @@ circleci config validate .circleci
 # pack and validate said pack
 circleci config pack src > orb.yml
 circleci orb validate orb.yml
+# publish dev:alpha
+circleci orb publish orb.yml rckeller/runtime-optimizer@dev:alpha
 ```
