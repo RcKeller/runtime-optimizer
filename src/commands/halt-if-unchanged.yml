@@ -27,4 +27,34 @@ steps:
         ls -l
         echo "----------------------------------------------------------------------------------------------------"
         # Invoke script
-        sh ./src/scripts/check-changes.sh "${CIRCLE_COMPARE_URL}" "<<parameters.watch>>" || circleci step halt
+        range() {
+            echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev
+        }
+
+        last_run_commit() {
+            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 1 | cut -d^ -f 1
+        }
+
+        current_commit() {
+            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 4
+        }
+
+        compare_range=$(range $CIRCLE_COMPARE_URL)
+        first=$(current_commit $compare_range)
+        last=$(last_run_commit $compare_range)
+        watch_files=$("<<parameters.watch>>")
+
+        echo "Comparing changes for range ${last} to ${first}"
+
+        output=$(git diff $last^ $first -- $watch_files 2>&1)
+
+        if [ $? -gt 0 ]; then
+          echo "Error looking for changes!"
+          exit 0
+        elif [ -n "$output" ]; then
+          echo "Changes detected - proceeding"
+          exit 0
+        else
+          echo "No changes detected - halting job"
+          circleci step halt
+        fi
