@@ -17,7 +17,7 @@ jobs:
           debug: true
       # CASE: Something has changed - continue running job
       - runtime-optimizer/halt-if-unchanged:
-          watch: "." # everything
+          watch: ".circleci src README.md" # everything
       # CASE: No changes to watched files, so halt job
       - runtime-optimizer/halt-if-unchanged:
           watch: "LICENSE" # should never change
