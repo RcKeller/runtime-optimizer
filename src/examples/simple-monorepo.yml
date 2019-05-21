@@ -1,17 +1,17 @@
 description: >
-  Execute some action only for modified files from this commit.
-  In this scenario, a monorepo containing "/client" and "/server"
+  Simple Example: a monorepo containing "/client" and "/server"
   recently had changes to the client, but not the server
-  Using runtime-optimizer/halt-if-unchanged, only client-side
-  jobs should run. Server tests
-  https://discuss.circleci.com/t/does-circleci-2-0-work-with-monorepos
+  runtime-optimizer/checkout-with-cache - optimizes repeat runs
+  runtime-optimizer/halt-if-unchanged - halts (passes) server runs
+  because only the client side has changed - making server specs redundant
+  PEER DEPENDENCY: iynere/compare-url - to ensure $CIRCLE_COMPARE_URL is made
 
 usage:
   version: 2.1
 
   orbs:
     runtime-optimizer: rckeller/runtime-optimizer@x.y.z
-    # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
+    # PEER DEPENDENCY: Ensure CIRCLE_COMPARE_URL exists
     compare-url: iynere/compare-url@1.0.0
 
   workflows:
@@ -26,7 +26,7 @@ usage:
       docker:
         - image: circleci/circleci-cli
       steps:
-        - runtime-optimizer/checkout
+        - runtime-optimizer/checkout-with-cache
         - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "client" # CHANGED
@@ -37,7 +37,7 @@ usage:
       docker:
         - image: circleci/circleci-cli
       steps:
-        - runtime-optimizer/checkout
+        - runtime-optimizer/checkout-with-cache
         - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "server" # UNCHANGED

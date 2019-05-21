@@ -15,10 +15,11 @@ An optimized version of the built-in `checkout` step. Uses caching and git garba
 ## Local testing
 Run these commands before pushing commits - prevents changes from being punted back by orb tools.
 
-```
-# validate config
-yamllint -d .yamllint .
-circleci config validate
+```bash
+# validate source files
+yamllint -d .yamllint .circleci src
+circleci config validate .circleci
+# pack and validate said pack
 circleci config pack src > orb.yml
 circleci orb validate orb.yml
 ```

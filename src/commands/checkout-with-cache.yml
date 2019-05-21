@@ -1,5 +1,5 @@
 description: >
-  Optimized checkout step that caches source files for subsequent runs
+  Optimized checkout step which caches source files for subsequent runs
   Uses git garbage collection to improve cache performance.
   This improve performance for repeat CI runs, e.g. API triggered or manually repeated runs.
 
