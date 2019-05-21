@@ -2,27 +2,6 @@ description: >
   Halts redundant CI runs if watched directories are unchanged
 
 parameters:
-  # === FROM iynere/compare-url ===
-  circle-token:
-    description: >
-      Your CircleCI API token, defaults to $CIRCLE_TOKEN
-    type: env_var_name
-    default: CIRCLE_TOKEN
-
-  project-path:
-    description: >
-      Absolute path to your project's base directory,
-      necessary for running git commands
-    type: string
-    default: ~/project
-
-  debug:
-    description: >
-      Additional debugging output for folks developing the orb
-    type: boolean
-    default: false
-
-  # Original
   watch:
     description: >
       Directories to watch for changes, separated by spaces
@@ -35,7 +14,7 @@ steps:
   - run:
       name: "[runtime-optimizer/halt-if-unchanged] - Halting if watch files are unchanged"
       command: |
-        if [ -z ${CIRCLE_COMPARE_URL+x} ]
+        if [ -z "$CIRCLE_COMPARE_URL" ]
         then
           echo "$CIRCLE_COMPARE_URL unset - seeing if it was saved to workspace"
           echo "iynere/compare-url will do so automatically using compare-url/reconstruct"
