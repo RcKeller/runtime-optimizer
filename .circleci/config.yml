@@ -12,7 +12,7 @@ jobs:
     docker:
       - image: cibuilds/base
     steps:
-      # Use the optimized checkout step
+      # Use the optimized checkout step - fails if unable to access .git
       - runtime-optimizer/checkout-with-cache
       # TODO: edge case tests
       - compare-url/reconstruct:

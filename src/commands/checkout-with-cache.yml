@@ -30,10 +30,13 @@ steps:
       # https://discuss.circleci.com/t/circleci-checkout-seems-to-do-shallow-checkout-clone/27458/3
   - run:
       name: "[runtime-optimizer/checkout] - Git garbage collection"
-      command: git gc
+      command: |
+        # CD to project directory
+        cd /root/project/<<parameters.path>>
+        git gc
       # Significantly reduces the size of the git cache
   - save_cache:
       name: "[runtime-optimizer/checkout] - Save git source cache"
       key: <<parameters.key>>-{{ .Branch }}-{{ .Revision }}
       paths:
-        - ".git"
+        - "/root/project/<<parameters.path>>/.git"
