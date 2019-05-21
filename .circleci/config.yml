@@ -12,7 +12,9 @@ jobs:
     docker:
       - image: cibuilds/base
     steps:
-      - checkout
+      # Use the optimized checkout step
+      - runtime-optimizer/checkout
+      # TODO: edge case tests
       - compare-url/reconstruct:
           debug: true
       # CASE: Something has changed - continue running job

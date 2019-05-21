@@ -1,5 +1,6 @@
 version: 2.1
 
 description: >
-  Various commands and jobs for optimizing CircleCI runtime
-  https://github.com/rckeller/circleci-runtime-optimizer
+  Commands for optimizing runtimes for CircleCI jobs
+  https://circleci.com/orbs/registry/orb/rckeller/runtime-optimizer
+  https://github.com/rckeller/runtime-optimizer

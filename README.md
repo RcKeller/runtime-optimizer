@@ -10,7 +10,7 @@
 Halts and passes jobs if watched files have not been changed since the last CI job. For example, if you're doing full stack development and only change the files in `server/`, only your server-side tests will run.
 
 ### `runtime-optimizer/checkout`
-**WIP** - An optimized version of the built-in `checkout` step, with support for git caching.
+An optimized version of the built-in `checkout` step. Uses caching and git garbage collection to improve the performance of repeated job runs.
 
 ## Local testing
 Run these commands before pushing commits - prevents changes from being punted back by the orb linter.

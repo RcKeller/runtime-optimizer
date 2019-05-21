@@ -1,0 +1,29 @@
+description: >
+  Optimized checkout step that caches source files for subsequent runs
+  Uses git garbage collection to improve cache performance.
+  Will improve performance for repeat CI runs (manually or API trigger builds/deploys, etc)
+
+parameters:
+  key:
+    description: >
+      Cache key, without a checksum - e.g. "v1-job-name-"
+      (Checksums are automatically appended).
+    type: string
+    default: "source-v1"
+
+steps:
+  # https://circleci.com/docs/2.0/caching/#source-caching
+  - restore_cache:
+      keys:
+        - <<parameters.key>>-{{ .Branch }}-{{ .Revision }}
+        - <<parameters.key>>-{{ .Branch }}-
+        - <<parameters.key>>-
+  - checkout
+  - run:
+      name: "[runtime-optimizer/checkout] - Git garbage collection"
+      command: git gc
+      # Significantly reduces the size of the git cache
+  - save_cache:
+      key: <<parameters.key>>-{{ .Branch }}-{{ .Revision }}
+      paths:
+        - ".git"
