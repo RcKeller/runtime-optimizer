@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# https://circleci.com/docs/2.0/using-shell-scripts/#set-error-flags
-# # Use the error status of the first failure, rather than that of the last item in a pipeline.
-set -o pipefail
 
 range() {
     echo "$1" | rev | cut -d/ -f1 | rev
