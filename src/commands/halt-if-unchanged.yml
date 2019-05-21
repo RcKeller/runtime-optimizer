@@ -28,15 +28,15 @@ steps:
         echo "----------------------------------------------------------------------------------------------------"
         # Invoke script
         range() {
-            echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev
+            echo "$1" | rev | cut -d/ -f1 | rev
         }
 
         last_run_commit() {
-            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 1 | cut -d^ -f 1
+            echo "$1" | cut -d. -f 1 | cut -d^ -f 1
         }
 
         current_commit() {
-            echo "$CIRCLE_COMPARE_URL" | cut -d. -f 4
+            echo "$1" | cut -d. -f 4
         }
 
         compare_range=$(range $CIRCLE_COMPARE_URL)
