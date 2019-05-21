@@ -13,7 +13,8 @@ jobs:
       - image: cibuilds/base
     steps:
       # Use the optimized checkout step
-      - runtime-optimizer/checkout-with-cache
+      # - runtime-optimizer/checkout-with-cache
+      - checkout
       # TODO: edge case tests
       - compare-url/reconstruct:
           debug: true
