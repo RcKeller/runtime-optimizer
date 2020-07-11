@@ -17,7 +17,8 @@ steps:
           echo "----------------------------------------------------------------------------------------------------"
           echo "Error - $CIRCLE_COMPARE_URL is not defined"
           echo "This is easy to fix - add the following line to the environment variables for this job:"
-          echo "CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>"
+          echo "Q0lSQ0xFX0NPTVBBUkVfVVJMOiA8PCBwaXBlbGluZS5wcm9qZWN0LmdpdF91cmwgPj4vY29tcGFyZS88PCBwaXBlbGluZS5naXQuYmFzZV9yZXZpc2lvbiA+Pi4uPDxwaXBlbGluZS5naXQucmV2aXNpb24+Pg==" | base64 -d
+          # ^^ using base64 encoding to bypass a bug with circleci validate, where it thinks we actually inlined pipeline variables
           echo "----------------------------------------------------------------------------------------------------"
           exit 1
         fi
