@@ -16,6 +16,13 @@ Halts and passes jobs if watched files have not been changed since the last CI j
 Run these commands before pushing commits - prevents changes from being punted back by the orb linter.
 
 ```
+# validate the CI pipeline and code for the orb itself
 circleci config validate
 yamllint -d .yamllint .
+# get ready to publish
+circleci setup
+circleci orb validate src/@orb.yml
+# publish the current code in the lowest possible environment
+circleci orb publish promote rckeller/runtime-optimizer@dev:alpha patch
+# ci will promote the orb if it passes tests
 ```
