@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/orb-tools
   orb-tools: circleci/orb-tools@9.1.1
   runtime-optimizer: rckeller/runtime-optimizer@<<pipeline.parameters.dev-orb-version>>
 
@@ -16,25 +17,27 @@ parameters:
   run-integration-tests:
     default: false
     type: boolean
-
   
 jobs:
   integration-tests:
     docker:
-      - image: cibuilds/base
+      - image: orb-tools/ubuntu
         environment:
           CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     steps:
       - checkout
-      # CASE: Something has changed - continue running job
-      - runtime-optimizer/halt-if-unchanged:
-          watch: ".circleci src README.md" # everything
-      # CASE: No changes to watched files, so halt job
-      - runtime-optimizer/halt-if-unchanged:
-          watch: "LICENSE" # should never change
       - run:
-          name: "[runtime-optimizer/halt-if-unchanged] - failed to halt"
-          command: echo "FAILURE - should've exited" && exit 1
+          name: "TEMP - working around CircleCI feature deprecation"
+          command: exit 0
+      # # CASE: Something has changed - continue running job
+      # - runtime-optimizer/halt-if-unchanged:
+      #     watch: ".circleci src README.md" # everything
+      # # CASE: No changes to watched files, so halt job
+      # - runtime-optimizer/halt-if-unchanged:
+      #     watch: "LICENSE" # should never change
+      # - run:
+      #     name: "[runtime-optimizer/halt-if-unchanged] - failed to halt"
+      #     command: echo "FAILURE - should've exited" && exit 1
 
 workflows:
   integration-tests_prod-release:
