@@ -14,9 +14,12 @@ steps:
       command: |
         if [ -z "$CIRCLE_COMPARE_URL" ]
         then
-          echo "$CIRCLE_COMPARE_URL unset - seeing if it was saved to workspace"
-          echo "iynere/compare-url will do so automatically using compare-url/reconstruct"
-          CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+          echo "----------------------------------------------------------------------------------------------------"
+          echo "Error - $CIRCLE_COMPARE_URL is not defined"
+          echo "This is easy to fix - add the following line to the environment variables for this job:"
+          echo "CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>"
+          echo "----------------------------------------------------------------------------------------------------"
+          exit 1
         fi
         echo "----------------------------------------------------------------------------------------------------"
         echo "Checking for changes:"

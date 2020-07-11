@@ -3,18 +3,16 @@ version: 2.1
 orbs:
   orb-tools: circleci/orb-tools@6.0.0
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
-  # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
-  compare-url: iynere/compare-url@1.0.0
 
 # === INTEGRATION TESTS (for this orb) ===
 jobs:
   integration-tests:
     docker:
       - image: cibuilds/base
+        environment:
+          CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     steps:
       - checkout
-      - compare-url/reconstruct:
-          debug: true
       # CASE: Something has changed - continue running job
       - runtime-optimizer/halt-if-unchanged:
           watch: ".circleci src README.md" # everything

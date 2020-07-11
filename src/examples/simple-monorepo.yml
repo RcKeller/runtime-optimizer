@@ -10,9 +10,7 @@ usage:
   version: 2.1
 
   orbs:
-    runtime-optimizer: rckeller/runtime-optimizer@0.1
-    # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
-    compare-url: iynere/compare-url@1.0.0
+    runtime-optimizer: rckeller/runtime-optimizer@5.0.0
 
   workflows:
     version: 2
@@ -25,9 +23,10 @@ usage:
     test-client:
       docker:
         - image: circleci/circleci-cli
+          environment:
+            CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
       steps:
         - checkout
-        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "client" # CHANGED
         - run:
@@ -36,9 +35,10 @@ usage:
     test-server:
       docker:
         - image: circleci/circleci-cli
+          environment:
+            CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
       steps:
         - checkout
-        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
             watch: "server" # UNCHANGED
         - run:
