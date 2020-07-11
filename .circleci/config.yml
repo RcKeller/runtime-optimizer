@@ -17,13 +17,13 @@ parameters:
   run-integration-tests:
     default: false
     type: boolean
-  
+
 jobs:
   integration-tests:
     docker:
       - image: orb-tools/ubuntu
-        environment:
-          CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
+        # environment:
+        #   CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     steps:
       - checkout
       - run:
