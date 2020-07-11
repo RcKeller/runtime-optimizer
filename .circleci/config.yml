@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  orb-tools: circleci/orb-tools@6.0.0
+  orb-tools: circleci/orb-tools@9.1.1
   runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
 
 # === INTEGRATION TESTS (for this orb) ===
