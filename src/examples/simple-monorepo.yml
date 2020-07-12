@@ -23,11 +23,12 @@ usage:
     test-client:
       docker:
         - image: circleci/circleci-cli
-          environment:
-            CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
       steps:
         - checkout
         - runtime-optimizer/halt-if-unchanged:
+            git_url: <<pipeline.project.git_url>>
+            base_revision: <<pipeline.git.base_revision>>
+            revision: <<pipeline.git.revision>>
             watch: "client" # CHANGED
         - run:
             name: Your client-side tests here
@@ -35,11 +36,12 @@ usage:
     test-server:
       docker:
         - image: circleci/circleci-cli
-          environment:
-            CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
       steps:
         - checkout
         - runtime-optimizer/halt-if-unchanged:
+            git_url: <<pipeline.project.git_url>>
+            base_revision: <<pipeline.git.base_revision>>
+            revision: <<pipeline.git.revision>>
             watch: "server" # UNCHANGED
         - run:
             name: Your server-side tests here

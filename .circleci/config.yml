@@ -22,12 +22,13 @@ jobs:
   integration-tests:
     docker:
       - image: cibuilds/base
-        environment:
-          CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     steps:
       - checkout
       # CASE: Something has changed - continue running job
       - runtime-optimizer/halt-if-unchanged:
+          git_url: <<pipeline.project.git_url>>
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
           watch: ".circleci src README.md" # everything
       # CASE: No changes to watched files, so halt job
       - runtime-optimizer/halt-if-unchanged:

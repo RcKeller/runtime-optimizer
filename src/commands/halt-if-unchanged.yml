@@ -4,15 +4,15 @@ description: >
 parameters:
   git_url:
     description: >
-      [REQUIRED] Provide the pipeline.project.git_url parameter
+      [REQUIRED] Provide your pipeline.project.git_url
     type: string
   base_revision:
     description: >
-      [REQUIRED] pipeline.git.base_revision
+      [REQUIRED] Provide your pipeline.git.base_revision
     type: string
   revision:
     description: >
-      [REQUIRED] pipeline.git.revision
+      [REQUIRED] Provide your pipeline.git.revision
     type: string
   watch:
     description: >
@@ -29,9 +29,12 @@ steps:
         then
           echo "----------------------------------------------------------------------------------------------------"
           echo "Error - $CIRCLE_COMPARE_URL is not defined"
-          echo "This is easy to fix - add the following line to the environment variables for this job:"
-          echo "Q0lSQ0xFX0NPTVBBUkVfVVJMOiA8PCBwaXBlbGluZS5wcm9qZWN0LmdpdF91cmwgPj4vY29tcGFyZS88PCBwaXBlbGluZS5naXQuYmFzZV9yZXZpc2lvbiA+Pi4uPDxwaXBlbGluZS5naXQucmV2aXNpb24+Pg==" | base64 -d
-          # ^^ using base64 encoding to bypass a bug with circleci validate, where it thinks we actually inlined pipeline variables
+          echo "This is easy to fix - invoke this command by providing pipeline variables like so:"
+          echo "ICBnaXRfdXJsOiA8PHBpcGVsaW5lLnByb2plY3QuZ2l0X3VybD4+" | base64 -d
+          echo "ICBiYXNlX3JldmlzaW9uOiA8PHBpcGVsaW5lLmdpdC5iYXNlX3JldmlzaW9uPj4=" | base64 -d
+          echo "ICByZXZpc2lvbjogPDxwaXBlbGluZS5naXQucmV2aXNpb24+Pg==" | base64 -d
+          echo "ICB3YXRjaDogIi5jaXJjbGVjaS8iICMgcmVjb21tZW5kZWQ6IGxpc3Qgb2YgZGlyZWN0b3JpZXMgdG8gd2F0Y2g=" | base64 -d
+          # ^^ using base64 encoding to bypass a conflict with circleci, where it thinks we actually inlined pipeline variables
           echo "----------------------------------------------------------------------------------------------------"
           exit 1
         fi
