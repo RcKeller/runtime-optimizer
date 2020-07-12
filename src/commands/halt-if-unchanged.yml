@@ -45,7 +45,7 @@ steps:
 
         echo "Comparing changes for range ${last} to ${first}"
 
-        output=$(git diff $last^ $first -- <<parameters.watch>> 2>&1)
+        output=$(git diff $last $first --name-only -- <<parameters.watch>> 2>&1)
 
         if [ $? -gt 0 ]; then
           echo "Error looking for changes!"

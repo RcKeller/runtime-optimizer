@@ -1,12 +1,25 @@
 version: 2.1
 
 orbs:
-  orb-tools: circleci/orb-tools@6.0.0
-  runtime-optimizer: rckeller/runtime-optimizer@dev:alpha
+  # https://circleci.com/orbs/registry/orb/circleci/orb-tools
+  orb-tools: circleci/orb-tools@9.1.1
+  runtime-optimizer: rckeller/runtime-optimizer@<<pipeline.parameters.dev-orb-version>>
   # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
-  compare-url: iynere/compare-url@1.0.0
+  compare-url: iynere/compare-url@1.2.0
 
-# === INTEGRATION TESTS (for this orb) ===
+orb_prep_jobs:
+  - orb-tools/lint
+  - orb-tools/shellcheck
+  - orb-tools/pack
+
+parameters:
+  dev-orb-version:
+    default: 'dev:alpha'
+    type: string
+  run-integration-tests:
+    default: false
+    type: boolean
+
 jobs:
   integration-tests:
     docker:
@@ -25,99 +38,34 @@ jobs:
           name: "[runtime-optimizer/halt-if-unchanged] - failed to halt"
           command: echo "FAILURE - should've exited" && exit 1
 
-# === WORKFLOWS (for publishing this orb) ===
 workflows:
-  lint_pack-validate_publish-dev:
+  integration-tests_prod-release:
     jobs:
-      # Linter
-      - orb-tools/lint
-      # Pack all YAML files as a single file - orb.yml + validate
-      - orb-tools/pack:
-          requires:
-            - orb-tools/lint
-      # release dev version of orb, for testing & possible publishing
-      - orb-tools/publish-dev:
-          orb-name: rckeller/runtime-optimizer
-          requires:
-            - orb-tools/pack
-
-      # # trigger an integration workflow to test the dev version of your orb
-      # # an SSH key must be stored in your orb's repository and in CircleCI
-      # # (add the public key as a read/write key on GitHub; add the private
-      # # key in CircleCI via SSH Permissions, with github.com as Hostname)
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-dev
-          ssh-fingerprints: a9:88:12:91:d0:a9:2f:e2:96:91:b1:1d:e7:3c:4c:eb
-          requires:
-            - orb-tools/publish-dev
-          filters:
-            branches:
-              ignore: master
-
-      # # by default, the 1st job (above) will trigger only integration tests;
-      # # the 2nd job (below) may also publish a production orb version
-      - orb-tools/trigger-integration-workflow:
-          name: trigger-integration-master
-          ssh-fingerprints: a9:88:12:91:d0:a9:2f:e2:96:91:b1:1d:e7:3c:4c:eb
-          tag: master
-          requires:
-            - orb-tools/publish-dev
+      - integration-tests
+      - orb-tools/dev-promote-prod-from-commit-subject:
+          add-pr-comment: false
+          fail-if-semver-not-indicated: false
           filters:
             branches:
               only: master
-
-  # # this `integration-tests_prod-release` workflow will ignore commits
-  # # it is only triggered by git tags, which are created in the job above
-  integration-tests_prod-release:
+          orb-name: rckeller/runtime-optimizer
+          publish-version-tag: false
+          requires:
+            - integration-tests
+    when: << pipeline.parameters.run-integration-tests >>
+  lint_pack-validate_publish-dev:
     jobs:
-      # Integration tests are renamed based on branch filters
-      - integration-tests:
-          name: integration-tests-dev
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /integration-.*/
-      - integration-tests:
-          name: integration-tests-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-.*/
-
-      # patch, minor, or major publishing, depending on which orb source
-      # files have been modified (that logic lives in the
-      # trigger-integration-workflow job's source)
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-patch
+      - orb-tools/lint
+      - orb-tools/shellcheck
+      - orb-tools/pack
+      - orb-tools/publish-dev:
           orb-name: rckeller/runtime-optimizer
           requires:
-            - integration-tests-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-patch.*/
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-minor
-          release: minor
-          orb-name: rckeller/runtime-optimizer
+            - orb-tools/lint
+            - orb-tools/shellcheck
+            - orb-tools/pack
+      - orb-tools/trigger-integration-tests-workflow:
+          name: trigger-integration-dev
           requires:
-            - integration-tests-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-minor.*/
-      - orb-tools/dev-promote-prod:
-          name: dev-promote-major
-          release: major
-          orb-name: rckeller/runtime-optimizer
-          requires:
-            - integration-tests-master
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /master-major.*/
+            - orb-tools/publish-dev
+    unless: << pipeline.parameters.run-integration-tests >>
