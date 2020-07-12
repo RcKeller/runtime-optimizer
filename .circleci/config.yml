@@ -4,8 +4,6 @@ orbs:
   # https://circleci.com/orbs/registry/orb/circleci/orb-tools
   orb-tools: circleci/orb-tools@9.1.1
   runtime-optimizer: rckeller/runtime-optimizer@<<pipeline.parameters.dev-orb-version>>
-  # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
-  compare-url: iynere/compare-url@1.2.0
 
 orb_prep_jobs:
   - orb-tools/lint
@@ -26,8 +24,6 @@ jobs:
       - image: cibuilds/base
     steps:
       - checkout
-      - compare-url/reconstruct:
-          debug: true
       # CASE: Something has changed - continue running job
       - runtime-optimizer/halt-if-unchanged:
           watch: ".circleci src README.md" # everything

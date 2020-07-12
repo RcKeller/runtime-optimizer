@@ -7,17 +7,91 @@ parameters:
       Directories to watch for changes, separated by spaces
     type: string
     default: ".circleci"
+  circle-token:
+    description: >
+      Name of environment variable storing your CircleCI API token
+    type: env_var_name
+    default: CIRCLE_TOKEN
+  project-path:
+    description: >
+      Absolute path to your project's base directory,
+      necessary for running git commands
+    type: string
+    default: ~/project
 
 steps:
   - run:
       name: "[runtime-optimizer/halt-if-unchanged] - Halting if watch files are unchanged"
       command: |
-        if [ -z "$CIRCLE_COMPARE_URL" ]
-        then
-          echo "$CIRCLE_COMPARE_URL unset - seeing if it was saved to workspace"
-          echo "iynere/compare-url will do so automatically using compare-url/reconstruct"
-          CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
+        # curl not included in circleci/circleci-cli but required here. Alternative is to create a specialized
+        # executor for this purpose.
+        apk add --no-cache curl
+        
+        echo "----------------------------------------------------------------------------------------------------"
+        echo "Generating $CIRCLE_COMPARE_URL using git history"
+        echo "  Method adapted from iynere/compare-url@1.2.0"
+
+        # this method assumes TBD
+        FOUND_BASE_COMPARE_COMMIT=false
+
+        # start iteration from the job before $CIRCLE_BUILD_NUM
+        JOB_NUM=$(( $CIRCLE_BUILD_NUM - 1 ))
+
+        extract_commit_from_job () {
+          # takes $1 (VCS_TYPE) & $2 (a job number)
+          curl --user << parameters.circle-token >>: \
+            https://circleci.com/api/v1.1/project/$1/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$2 | \
+            grep '"vcs_revision" : ' | sed -E 's/"vcs_revision" ://' | sed -E 's/[[:punct:]]//g' | sed -E 's/ //g'
+        }
+
+        # determine VCS type - currently circleci only supports two
+        if ( echo $CIRCLE_REPOSITORY_URL | grep github.com ); then
+          VCS_TYPE=github
+        else
+          VCS_TYPE=bitbucket
         fi
+
+        until ( $FOUND_BASE_COMPARE_COMMIT == true )
+        do
+          # save current job/api output to a temp file
+          curl --user << parameters.circle-token >>: \
+               https://circleci.com/api/v1.1/project/$VCS_TYPE/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$JOB_NUM \
+               > JOB_OUTPUT
+
+          if ( ! grep "\"workflow_id\" : \"$CIRCLE_WORKFLOW_ID\"" JOB_OUTPUT ) && \
+            # job is not a retry of a previous job
+            ( grep '"retry_of" : null' JOB_OUTPUT ) && \
+
+            # job is not from a rerun workflow (same commit)
+            ! $(grep "\"vcs_revision\" : \"$CIRCLE_SHA1\"" JOB_OUTPUT) && \
+
+            # on the same branch as $CIRCLE_BRANCH
+            ( grep "\"branch\" : \"$CIRCLE_BRANCH\"" JOB_OUTPUT ); then
+            echo "job $JOB_NUM is a new merge"
+            FOUND_BASE_COMPARE_COMMIT=true
+          else
+            echo "job $JOB_NUM was part of the current workflow, a rerun workflow, or a retry"
+            JOB_NUM=$(( $JOB_NUM - 1 ))
+            continue
+          fi
+
+        done
+
+        # rm -f JOB_OUTPUT
+
+        BASE_COMPARE_COMMIT=$(extract_commit_from_job $VCS_TYPE $JOB_NUM)
+
+        # construct our compare URL, based on VCS type
+        if ( echo $VCS_TYPE | grep github ); then
+          CIRCLE_COMPARE_URL="https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/compare/${BASE_COMPARE_COMMIT:0:12}...${CIRCLE_SHA1:0:12}"
+        else
+          CIRCLE_COMPARE_URL="https://bitbucket.org/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/branches/compare/${BASE_COMPARE_COMMIT:0:12}...${CIRCLE_SHA1:0:12}"
+        fi
+
+        echo "----------------------------------------------------------------------------------------------------"
+        echo "base compare commit hash:" $BASE_COMPARE_COMMIT
+        echo "current job commit hash:" $CIRCLE_SHA1
+        echo "recreated CIRCLE_COMPARE_URL:" $CIRCLE_COMPARE_URL
         echo "----------------------------------------------------------------------------------------------------"
         echo "Checking for changes:"
         echo $CIRCLE_COMPARE_URL
