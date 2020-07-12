@@ -23,6 +23,7 @@ yamllint -d .yamllint .
 circleci setup
 circleci orb validate src/@orb.yml
 # publish the current code in the lowest possible environment
-circleci orb publish promote rckeller/runtime-optimizer@dev:alpha patch
-# ci will promote the orb if it passes tests
+circleci config pack --skip-update-check src > orb.yml
+circleci orb --skip-update-check validate orb.yml
+circleci orb publish promote orb.yml rckeller/runtime-optimizer@dev:alpha
 ```

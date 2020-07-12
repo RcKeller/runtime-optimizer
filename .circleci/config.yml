@@ -32,6 +32,9 @@ jobs:
           watch: ".circleci src README.md" # everything
       # CASE: No changes to watched files, so halt job
       - runtime-optimizer/halt-if-unchanged:
+          git_url: <<pipeline.project.git_url>>
+          base_revision: <<pipeline.git.base_revision>>
+          revision: <<pipeline.git.revision>>
           watch: "LICENSE" # should never change
       - run:
           name: "[runtime-optimizer/halt-if-unchanged] - failed to halt"
