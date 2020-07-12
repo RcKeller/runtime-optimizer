@@ -26,7 +26,7 @@ steps:
         # curl not included in circleci/circleci-cli but required here. Alternative is to create a specialized
         # executor for this purpose.
         apk add --no-cache curl
-        
+
         echo "----------------------------------------------------------------------------------------------------"
         echo "Generating $CIRCLE_COMPARE_URL using git history"
         echo "  Method adapted from iynere/compare-url@1.2.0"
