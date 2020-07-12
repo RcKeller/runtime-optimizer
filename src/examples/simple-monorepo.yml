@@ -10,7 +10,9 @@ usage:
   version: 2.1
 
   orbs:
-    runtime-optimizer: rckeller/runtime-optimizer@5.0.0
+    runtime-optimizer: rckeller/runtime-optimizer@<<pipeline.parameters.dev-orb-version>>
+    # Ensure CIRCLE_COMPARE_URL exists - recommended peer dependency
+    compare-url: iynere/compare-url@1.2.0
 
   workflows:
     version: 2
@@ -25,10 +27,8 @@ usage:
         - image: circleci/circleci-cli
       steps:
         - checkout
+        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
-            git_url: <<pipeline.project.git_url>>
-            base_revision: <<pipeline.git.base_revision>>
-            revision: <<pipeline.git.revision>>
             watch: "client" # CHANGED
         - run:
             name: Your client-side tests here
@@ -38,10 +38,8 @@ usage:
         - image: circleci/circleci-cli
       steps:
         - checkout
+        - compare-url/reconstruct # ensures CIRCLE_COMPARE_URL exists
         - runtime-optimizer/halt-if-unchanged:
-            git_url: <<pipeline.project.git_url>>
-            base_revision: <<pipeline.git.base_revision>>
-            revision: <<pipeline.git.revision>>
             watch: "server" # UNCHANGED
         - run:
             name: Your server-side tests here

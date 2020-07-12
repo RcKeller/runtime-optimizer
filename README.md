@@ -25,5 +25,5 @@ circleci orb validate src/@orb.yml
 # publish the current code in the lowest possible environment
 circleci config pack --skip-update-check src > orb.yml
 circleci orb --skip-update-check validate orb.yml
-circleci orb publish promote orb.yml rckeller/runtime-optimizer@dev:alpha
+circleci orb publish orb.yml rckeller/runtime-optimizer@dev:alpha
 ```

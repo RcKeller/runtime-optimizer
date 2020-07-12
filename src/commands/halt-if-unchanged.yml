@@ -2,18 +2,6 @@ description: >
   Halts redundant CI runs if watched directories are unchanged
 
 parameters:
-  git_url:
-    description: >
-      [REQUIRED] Provide your pipeline.project.git_url
-    type: string
-  base_revision:
-    description: >
-      [REQUIRED] Provide your pipeline.git.base_revision
-    type: string
-  revision:
-    description: >
-      [REQUIRED] Provide your pipeline.git.revision
-    type: string
   watch:
     description: >
       Directories to watch for changes, separated by spaces
@@ -24,19 +12,11 @@ steps:
   - run:
       name: "[runtime-optimizer/halt-if-unchanged] - Halting if watch files are unchanged"
       command: |
-        CIRCLE_COMPARE_URL="<<parameters.git_url>>/compare/<<parameters.base_revision>>..<<parameters.revision>>"
         if [ -z "$CIRCLE_COMPARE_URL" ]
         then
-          echo "----------------------------------------------------------------------------------------------------"
-          echo "Error - $CIRCLE_COMPARE_URL is not defined"
-          echo "This is easy to fix - invoke this command by providing pipeline variables like so:"
-          echo "ICBnaXRfdXJsOiA8PHBpcGVsaW5lLnByb2plY3QuZ2l0X3VybD4+" | base64 -d
-          echo "ICBiYXNlX3JldmlzaW9uOiA8PHBpcGVsaW5lLmdpdC5iYXNlX3JldmlzaW9uPj4=" | base64 -d
-          echo "ICByZXZpc2lvbjogPDxwaXBlbGluZS5naXQucmV2aXNpb24+Pg==" | base64 -d
-          echo "ICB3YXRjaDogIi5jaXJjbGVjaS8iICMgcmVjb21tZW5kZWQ6IGxpc3Qgb2YgZGlyZWN0b3JpZXMgdG8gd2F0Y2g=" | base64 -d
-          # ^^ using base64 encoding to bypass a conflict with circleci, where it thinks we actually inlined pipeline variables
-          echo "----------------------------------------------------------------------------------------------------"
-          exit 1
+          echo "$CIRCLE_COMPARE_URL unset - seeing if it was saved to workspace"
+          echo "iynere/compare-url will do so automatically using compare-url/reconstruct"
+          CIRCLE_COMPARE_URL=$(cat CIRCLE_COMPARE_URL.txt)
         fi
         echo "----------------------------------------------------------------------------------------------------"
         echo "Checking for changes:"
@@ -65,7 +45,7 @@ steps:
 
         echo "Comparing changes for range ${last} to ${first}"
 
-        output=$(git diff $last^ $first -- <<parameters.watch>> 2>&1)
+        output=$(git diff $last $first --name-only -- <<parameters.watch>> 2>&1)
 
         if [ $? -gt 0 ]; then
           echo "Error looking for changes!"
