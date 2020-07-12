@@ -21,7 +21,7 @@ parameters:
 jobs:
   integration-tests:
     docker:
-      - image: orb-tools/ubuntu
+      - image: cibuilds/base
         environment:
           CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     steps:
